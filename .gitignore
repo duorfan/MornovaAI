@@ -1,8 +1,9 @@
 # Ignore virtual environment
 .venv/
 
-# Ignore environment variables (API keys)
+# Ignore environment variables (API keys, credentials)
 .env
+credentials.json
 
 # Ignore compiled Python files
 __pycache__/
@@ -10,8 +11,8 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Ignore VS Code settings (optional, but useful if sharing repo)
+# Ignore VS Code settings (optional, useful if sharing the repo)
 .vscode/
 
-# Ignore macOS system files (optional, but helps avoid clutter)
+# Ignore macOS system files (avoids clutter)
 .DS_Store

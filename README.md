@@ -16,6 +16,7 @@ The system follows a structured workflow where **user input, external data (weat
 
 For detailed pseudocode, see [`pseudocode.py`](pseudocode.py).
 
+
 ## 🌅 Key Features
 - **Smart Light-Based Wake-Up** – Simulates sunrise with gradual brightness adjustments.
 - **AI-Powered Adaptive Alarms** – Adjusts wake-up time based on weather and calendar events.

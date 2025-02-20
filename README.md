@@ -6,10 +6,10 @@ Mornova AI is a **personalized wake-up assistant** that combines **smart lightin
 ## 🛠️ System Diagram
 The system follows a structured workflow where **user input, external data (weather, schedule, music), and AI-driven logic** determine the wake-up experience.
 
-### 📌 Diagram with Pseudocode
+### 📌 System Diagram
 ![Mornova AI System Diagram](assets/mornova_diagram.png)
 
-## 🔍 Understanding the Diagram
+### 🔍 Understanding the Diagram
 1. **User inputs preferences** → Preferences are stored in a database.
 2. **APIs fetch data** → Retrieves weather conditions, schedule, and music choices.
 3. **Processing & AI Analysis** → Adjusts wake-up time based on external factors.

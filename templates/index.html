@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mornova AI Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 20px;
+            background-color: #f4f7fa;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button i {
+            margin-right: 8px;
+        }
+        .result {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 5px;
+            background: #eef2f7;
+            text-align: left;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Mornova AI API Tester</h2>
+        
+        <button id="fetchWakeUpTime"><i class="fas fa-clock"></i> Get Wake-up Time</button>
+        <div class="result" id="wakeUpTimeResult"></div>
+        
+        <button id="fetchCalendar"><i class="fas fa-calendar-alt"></i> Get Calendar Events</button>
+        <div class="result" id="calendarResult"></div>
+        
+        <button id="fetchWeather"><i class="fas fa-cloud-sun"></i> Get Weather Forecast</button>
+        <div class="result" id="weatherResult"></div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            function fetchData(endpoint, resultDiv, button) {
+                $(resultDiv).hide().html('<i>Loading...</i>');
+                $(button).addClass('loading');
+
+                $.get(endpoint, function(data){
+                    $(resultDiv).html("<pre>" + JSON.stringify(data, null, 2) + "</pre>").fadeIn();
+                }).fail(function() {
+                    $(resultDiv).html("<i>Error fetching data. Please try again.</i>").fadeIn();
+                }).always(function(){
+                    $(button).removeClass('loading');
+                });
+            }
+
+            $("#fetchWakeUpTime").click(function(){
+                fetchData("/wake-up-time", "#wakeUpTimeResult", this);
+            });
+
+            $("#fetchCalendar").click(function(){
+                fetchData("/calendar", "#calendarResult", this);
+            });
+
+            $("#fetchWeather").click(function(){
+                fetchData("/weather", "#weatherResult", this);
+            });
+        });
+    </script>
+</body>
+</html>

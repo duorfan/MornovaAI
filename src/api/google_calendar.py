@@ -4,11 +4,12 @@ from google.auth.transport.requests import Request
 import os
 import pickle
 from googleapiclient.discovery import build
+from datetime import datetime, timezone
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-def get_calendar_events():
-    """Fetches upcoming events from Google Calendar."""
+def get_next_event():
+    """Fetches the next upcoming event from Google Calendar."""
     creds = None
 
     # Check if token exists (to avoid login every time)
@@ -30,12 +31,38 @@ def get_calendar_events():
 
     # Connect to Calendar API
     service = build("calendar", "v3", credentials=creds)
-    events_result = service.events().list(calendarId="primary", maxResults=5, singleEvents=True, orderBy="startTime").execute()
+    
+    # Get current time in UTC format
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Fetch upcoming events
+    events_result = service.events().list(
+        calendarId="primary",
+        timeMin=now,  # Fetch only future events
+        maxResults=10,  # Fetch more to ensure at least one valid event
+        singleEvents=True,
+        orderBy="startTime"
+    ).execute()
+
     events = events_result.get("items", [])
 
-    return events
+    if not events:
+        return "No upcoming events."
+
+    # Return only the next event
+    next_event = events[0]
+
+    return {
+        "summary": next_event.get("summary", "No Title"),
+        "start": next_event["start"]["dateTime"],
+        "end": next_event["end"]["dateTime"],
+        "timeZone": next_event["start"].get("timeZone", "UTC"),
+        "location": next_event.get("location", "No location"),
+        "htmlLink": next_event.get("htmlLink", ""),
+        "status": next_event.get("status", ""),
+        "attendees": next_event.get("attendees", [])
+    }
 
 if __name__ == "__main__":
-    events = get_calendar_events()
-    for event in events:
-        print(event["summary"], event["start"]["dateTime"])
+    next_event = get_next_event()
+    print(next_event)

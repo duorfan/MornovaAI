@@ -1,41 +1,43 @@
-import os
-from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from src.api.google_calendar import get_calendar_events
+import sys
+import os
+import importlib
+
+# Ensure the script runs correctly as a module
+if "src.ai.assistant" in sys.modules:
+    importlib.reload(sys.modules["src.ai.assistant"])
+
+# Ensure the 'src' package is correctly located
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+from src.api.google_calendar import get_next_event
 from src.api.weather_api import get_weather_forecast
-from openai import OpenAI
-
-# Load API keys from .env
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 def suggest_wake_up_time():
-    """AI logic to determine an optimal wake-up time based on calendar and weather."""
-    events = get_calendar_events()
-    weather = get_weather_forecast()
-
-    # Find earliest event
-    earliest_event = min(events, key=lambda e: e["start_time"]) if events else None
-
-    if not earliest_event:
+    """Determine an optimal wake-up time based on calendar and weather."""
+    event = get_next_event()  # Now assuming it returns a single event dictionary
+    
+    if not event:
         return "No events scheduled. Wake up at your preferred time!"
 
-    wake_up_time = datetime.strptime(earliest_event["start_time"], "%Y-%m-%dT%H:%M:%S") - timedelta(hours=1)
+    try:
+        # Extract event time from the dictionary
+        event_time_str = event.get("start")  # Adjusted to match your printed structure
+        event_time = datetime.strptime(event_time_str, "%Y-%m-%dT%H:%M:%S%z")
+    except Exception as e:
+        return f"Error parsing event time: {e}"
 
-    # Adjust based on weather conditions
-    if "rain" in weather["forecast"]:
-        wake_up_time -= timedelta(minutes=15)  # Wake up earlier if it's raining.
+    # Set default wake-up time (1 hour before the event)
+    wake_up_time = event_time - timedelta(hours=1)
 
-    # Use GPT to refine the suggestion
-    prompt = f"""
-    Given that the earliest event is at {earliest_event["start_time"]} and the weather is {weather["forecast"]}, 
-    what is a good wake-up time to ensure I'm ready while maximizing sleep?
-    """
-    response = client.Completion.create(model="gpt-4", prompt=prompt, max_tokens=50)
-    ai_suggestion = response["choices"][0]["text"].strip()
+    # Get weather forecast
+    try:
+        weather = get_weather_forecast()
+        if weather and "forecast" in weather and isinstance(weather["forecast"], str):
+            if "rain" in weather["forecast"].lower():
+                wake_up_time -= timedelta(minutes=15)
+    except Exception as e:
+        return f"Error fetching weather data: {e}"
 
-    return ai_suggestion or wake_up_time.strftime("%H:%M:%S")
+    return wake_up_time.strftime("%H:%M:%S")
 
-__all__ = ["suggest_wake_up_time"]

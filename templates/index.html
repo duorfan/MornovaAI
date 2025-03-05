@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -108,4 +108,416 @@
         });
     </script>
 </body>
+</html> -->
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mornova Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    /* Main container splits page into left and right sections */
+    .main-container {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+    }
+    /* Left container holds two sections (top & bottom) with a 12px gap */
+    .left-container {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    /* Each section gets a glass-like light blue background */
+    .section {
+      background: rgba(173, 216, 230, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    /* Top section: current time and next alarm side by side */
+    .top-section {
+      display: flex;
+      gap: 20px;
+    }
+    .top-section .block {
+      flex: 1;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    /* Bottom section: weather, schedule, and music blocks side by side */
+    .bottom-section {
+      display: flex;
+      gap: 20px;
+    }
+    .bottom-section .block {
+      flex: 1;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    /* Right section: Suggestion */
+    .suggestion-section {
+      flex: 1;
+      background: rgba(173, 216, 230, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+    .suggestion-section .block {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+      height: 100%;
+    }
+    /* New AI Voice Assistant section (full width below main container) */
+    .ai-section {
+      margin-top: 12px;
+      background: rgba(173, 216, 230, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .ai-section .block {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    /* Canvas styling for clocks */
+    canvas {
+      background: #eee;
+      border-radius: 50%;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Existing Sections -->
+  <div class="main-container">
+    <!-- Left side: Top & Bottom sections -->
+    <div class="left-container">
+      <!-- Top Section: Current Time and Next Alarm -->
+      <div class="section top-section">
+        <!-- Current Time Block -->
+        <div class="block current-time">
+          <canvas id="currentClock" width="100" height="100"></canvas>
+          <div id="currentTimeDigital">--:--</div>
+          <div id="currentDate">Weekday, Date, Year</div>
+        </div>
+        <!-- Next Alarm Block -->
+        <div class="block next-alarm">
+          <canvas id="alarmClock" width="100" height="100"></canvas>
+          <div>Next Alarm</div>
+          <div id="alarmTimeDigital">--:--:--</div>
+        </div>
+      </div>
+      <!-- Bottom Section: Weather, Schedule, Music of the Day -->
+      <div class="section bottom-section">
+        <!-- Weather Block -->
+        <div class="block weather">
+          <h3>Weather</h3>
+          <div id="weather-info">
+            Full weather info here...
+          </div>
+        </div>
+        <!-- Schedule Block -->
+        <div class="block schedule">
+          <h3>Schedule</h3>
+          <div id="schedule-info">
+            Loading schedule...
+          </div>
+        </div>
+        <!-- Music of the Day Block -->
+        <div class="block music">
+          <h3>Music of the Day</h3>
+          <div id="music-info">
+            Loading music...
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Right side: Suggestion Section -->
+    <div class="suggestion-section">
+      <div class="block suggestion">
+        <h3>Suggestion</h3>
+        <div id="suggestion-info">
+          Loading suggestion...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New AI Voice Assistant Section -->
+  <div class="ai-section">
+    <div class="block ai-voice-assistant">
+      <h3>AI Voice Assistant</h3>
+      <div style="margin-bottom: 10px;">
+        <label for="assistant-identity">Assistant Identity:</label>
+        <input type="text" id="assistant-identity" placeholder="Enter identity" style="width:100%;">
+      </div>
+      <div style="margin-bottom: 10px;">
+        <button id="start-voice-btn">Start Voice Input</button>
+        <button id="stop-voice-btn" style="display:none;">Stop Voice Input</button>
+      </div>
+      <div id="voice-input-text" style="margin-top:10px; border:1px solid #ccc; padding:5px; min-height:50px;">
+        Voice input will appear here...
+      </div>
+      <div id="ai-response" style="margin-top:10px; border:1px solid #ccc; padding:5px; min-height:50px;">
+        AI Assistant Response...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- Existing Clock and Data Update Code -----
+    function drawClockOnCanvas(canvas, time) {
+      const ctx = canvas.getContext("2d");
+      const radius = canvas.height / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.translate(radius, radius);
+      drawFace(ctx, radius);
+      drawNumbers(ctx, radius);
+      drawTime(ctx, radius, time);
+      ctx.restore();
+    }
+
+    function drawFace(ctx, radius) {
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.90, 0, 2 * Math.PI);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.lineWidth = radius * 0.05;
+      ctx.strokeStyle = "#333";
+      ctx.stroke();
+    }
+
+    function drawNumbers(ctx, radius) {
+      let ang;
+      ctx.font = radius * 0.15 + "px arial";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      for (let num = 1; num < 13; num++) {
+        ang = num * Math.PI / 6;
+        ctx.rotate(ang);
+        ctx.translate(0, -radius * 0.75);
+        ctx.rotate(-ang);
+        ctx.fillText(num.toString(), 0, 0);
+        ctx.rotate(ang);
+        ctx.translate(0, radius * 0.75);
+        ctx.rotate(-ang);
+      }
+    }
+
+    function drawTime(ctx, radius, time) {
+      let hour = time.getHours();
+      let minute = time.getMinutes();
+      let second = time.getSeconds();
+      hour = hour % 12;
+      hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
+      drawHand(ctx, hour, radius * 0.5, radius * 0.07);
+      minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+      drawHand(ctx, minute, radius * 0.8, radius * 0.07);
+      second = (second * Math.PI / 30);
+      drawHand(ctx, second, radius * 0.9, radius * 0.02, "red");
+    }
+
+    function drawHand(ctx, pos, length, width, color = "black") {
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = color;
+      ctx.moveTo(0, 0);
+      ctx.rotate(pos);
+      ctx.lineTo(0, -length);
+      ctx.stroke();
+      ctx.rotate(-pos);
+    }
+
+    function updateClocks() {
+      const currentClockCanvas = document.getElementById("currentClock");
+      drawClockOnCanvas(currentClockCanvas, new Date());
+      let now = new Date();
+      document.getElementById("currentTimeDigital").innerText = now.toLocaleTimeString();
+      let optionsDate = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+      document.getElementById("currentDate").innerText = now.toLocaleDateString(undefined, optionsDate);
+    }
+
+    function updateNextAlarm() {
+      fetch("/wake-up-time")
+        .then(response => response.json())
+        .then(data => {
+          let alarmTimeStr = data.wake_up_time;
+          document.getElementById("alarmTimeDigital").innerText = alarmTimeStr;
+          let alarmTime = new Date();
+          let parts = alarmTimeStr.split(":");
+          if(parts.length === 3) {
+            alarmTime.setHours(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+          }
+          const alarmClockCanvas = document.getElementById("alarmClock");
+          drawClockOnCanvas(alarmClockCanvas, alarmTime);
+        })
+        .catch(error => console.error("Error fetching next alarm:", error));
+    }
+
+    function updateWeather() {
+      fetch("/weather")
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("weather-info").innerText =
+            `Date: ${data.date}
+Feels like: ${data.feelslike_c}°C
+Condition: ${data.condition}
+Chance of Rain: ${data.daily_chance_of_rain}%`;
+        })
+        .catch(error => console.error("Error fetching weather:", error));
+    }
+
+    function updateSchedule() {
+      fetch("/calendar")
+        .then(response => response.json())
+        .then(data => {
+          let scheduleContainer = document.getElementById("schedule-info");
+          scheduleContainer.innerHTML = "";
+          if (Array.isArray(data) && data.length > 0) {
+            let events = data.slice(0, 3);
+            events.forEach(event => {
+              let startDate = new Date(event.start);
+              let endDate = new Date(event.end);
+              let eventDiv = document.createElement("div");
+              eventDiv.style.borderBottom = "1px solid #ccc";
+              eventDiv.style.marginBottom = "5px";
+              eventDiv.style.paddingBottom = "5px";
+              eventDiv.innerHTML = `<strong>${event.summary}</strong><br>
+                Start: ${startDate.toLocaleString()}<br>
+                End: ${endDate.toLocaleString()}`;
+              scheduleContainer.appendChild(eventDiv);
+            });
+          } else {
+            scheduleContainer.innerText = "No upcoming events.";
+          }
+        })
+        .catch(error => console.error("Error fetching schedule:", error));
+    }
+
+    function updateSuggestion() {
+      fetch("/suggestion")
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("suggestion-info").innerText = data.suggestion || "No suggestions.";
+        })
+        .catch(error => console.error("Error fetching suggestion:", error));
+    }
+
+    // ----- AI Voice Assistant Code -----
+    let recognition;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript;
+          document.getElementById('voice-input-text').innerText = transcript;
+          sendToAiAssistant(transcript);
+      };
+
+      recognition.onerror = function(event) {
+          console.error("Speech recognition error", event);
+      };
+    } else {
+      alert("Your browser does not support speech recognition.");
+    }
+
+    document.getElementById('start-voice-btn').addEventListener('click', function() {
+      recognition.start();
+      document.getElementById('start-voice-btn').style.display = 'none';
+      document.getElementById('stop-voice-btn').style.display = 'inline-block';
+    });
+
+    document.getElementById('stop-voice-btn').addEventListener('click', function() {
+      recognition.stop();
+      document.getElementById('start-voice-btn').style.display = 'inline-block';
+      document.getElementById('stop-voice-btn').style.display = 'none';
+    });
+
+    function sendToAiAssistant(transcript) {
+      Promise.all([
+          fetch("/calendar").then(res => res.json()),
+          fetch("/weather").then(res => res.json())
+      ]).then(([calendarData, weatherData]) => {
+          const identity = document.getElementById('assistant-identity').value || "";
+          const requestData = {
+              voice_input: transcript,
+              calendar: calendarData,
+              weather: weatherData,
+              identity: identity
+          };
+
+          fetch("/ai-assistant", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(requestData)
+          })
+          .then(res => res.json())
+          .then(data => {
+              document.getElementById('ai-response').innerText = data.response;
+              // Use speech synthesis for voice output if available.
+              if ('speechSynthesis' in window) {
+                let utterance = new SpeechSynthesisUtterance(data.response);
+                speechSynthesis.speak(utterance);
+              }
+          })
+          .catch(err => {
+              console.error("Error in AI assistant", err);
+              document.getElementById('ai-response').innerText = "Error contacting AI assistant.";
+          });
+      });
+    }
+
+    // ----- Call Update Functions -----
+    document.addEventListener("DOMContentLoaded", () => {
+      updateClocks();
+      updateNextAlarm();
+      updateWeather();
+      updateSchedule();
+      updateSuggestion();
+      setInterval(updateClocks, 1000);
+      setInterval(updateNextAlarm, 300000);
+      setInterval(updateWeather, 300000);
+      setInterval(updateSchedule, 300000);
+      setInterval(updateSuggestion, 300000);
+    });
+  </script>
+</body>
 </html>
+
+
+<!-- you are a product called mornova, you should help me wake up at appropriate time to catch up my schedule. you should also consider weather data to make some suggestions like dont forget to heat the car or dont go outside there is a storm or dont forget to bring umbrella. you should also consider the event based on the title, like if the title is "go to dmv" you should say dont forget the documents you might need to use in dmv. and you must always give me a suggested time to wake up because mornova is an ai alarm product, the suggested time should be always explicitly telling the time in ##:## am/pm. -->

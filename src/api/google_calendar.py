@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
-def get_next_event():
-    """Fetches the next upcoming event from Google Calendar."""
+def get_next_events():
+    """Fetches the next upcoming events from Google Calendar (up to 3 events)."""
     creds = None
 
     # Check if token exists (to avoid login every time)
@@ -39,7 +39,7 @@ def get_next_event():
     events_result = service.events().list(
         calendarId="primary",
         timeMin=now,  # Fetch only future events
-        maxResults=10,  # Fetch more to ensure at least one valid event
+        maxResults=10,  # Fetch more to ensure we get at least 3 events
         singleEvents=True,
         orderBy="startTime"
     ).execute()
@@ -47,22 +47,22 @@ def get_next_event():
     events = events_result.get("items", [])
 
     if not events:
-        return "No upcoming events."
+        return []
 
-    # Return only the next event
-    next_event = events[0]
-
-    return {
-        "summary": next_event.get("summary", "No Title"),
-        "start": next_event["start"]["dateTime"],
-        "end": next_event["end"]["dateTime"],
-        "timeZone": next_event["start"].get("timeZone", "UTC"),
-        "location": next_event.get("location", "No location"),
-        "htmlLink": next_event.get("htmlLink", ""),
-        "status": next_event.get("status", ""),
-        "attendees": next_event.get("attendees", [])
-    }
+    next_events = []
+    for event in events[:3]:
+        next_events.append({
+            "summary": event.get("summary", "No Title"),
+            "start": event["start"].get("dateTime", event["start"].get("date")),
+            "end": event["end"].get("dateTime", event["end"].get("date")),
+            "timeZone": event["start"].get("timeZone", "UTC"),
+            "location": event.get("location", "No location"),
+            "htmlLink": event.get("htmlLink", ""),
+            "status": event.get("status", ""),
+            "attendees": event.get("attendees", [])
+        })
+    return next_events
 
 if __name__ == "__main__":
-    next_event = get_next_event()
-    print(next_event)
+    events = get_next_events()
+    print(events)

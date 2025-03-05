@@ -11,7 +11,7 @@ if not WEATHER_API_KEY:
 
 def get_weather_forecast():
     """Fetches and filters weather data for Mornova AI"""
-    location = "New York"
+    location = "Durham"
     url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={location}&days=1"
 
     response = requests.get(url)
@@ -24,11 +24,13 @@ def get_weather_forecast():
         
         filtered_data = {
             "date": forecast.get("date"),
+            "temperature": current_weather.get("temp_c"),  # Added temperature field
             "feelslike_c": current_weather.get("feelslike_c"),
             "condition": current_weather.get("condition", {}).get("text"),
             "daily_chance_of_rain": forecast.get("day", {}).get("daily_chance_of_rain", 0),
             "is_day": current_weather.get("is_day")
         }
+
 
         return filtered_data
     else:

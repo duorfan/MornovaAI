@@ -1,4 +1,5 @@
 # Mornova AI
+<iframe src="https://duorfan.notion.site/ebd/198f98b6add9801f99aad12e02392304" width="100%" height="600" frameborder="0" allowfullscreen />
 
 ## 🚀 Overview
 Mornova AI is a **personalized wake-up assistant** that combines **smart lighting, AI-driven scheduling, and music integration** to create a smooth, natural morning experience. Instead of harsh alarms, it gradually wakes you up using **adaptive light, sound, and real-time insights** like weather and schedule adjustments.

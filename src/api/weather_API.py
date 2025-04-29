@@ -1,3 +1,4 @@
+# src/api/weather_api.py
 import os
 import requests
 from dotenv import load_dotenv
@@ -10,32 +11,29 @@ if not WEATHER_API_KEY:
     raise ValueError("Missing WEATHER_API_KEY. Check your .env file!")
 
 def get_weather_forecast():
-    """Fetches and filters weather data for Mornova AI"""
+    """Fetches and filters weather data for Mornova AI."""
     location = "Durham"
-    url = f"http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={location}&days=1"
+    url = (
+        f"http://api.weatherapi.com/v1/forecast.json"
+        f"?key={WEATHER_API_KEY}&q={location}&days=1"
+    )
 
     response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-
-        # Extract useful information
-        current_weather = data.get("current", {})
-        forecast = data.get("forecast", {}).get("forecastday", [{}])[0]
-        
-        filtered_data = {
-            "date": forecast.get("date"),
-            "temperature": current_weather.get("temp_c"),  # Added temperature field
-            "feelslike_c": current_weather.get("feelslike_c"),
-            "condition": current_weather.get("condition", {}).get("text"),
-            "daily_chance_of_rain": forecast.get("day", {}).get("daily_chance_of_rain", 0),
-            "is_day": current_weather.get("is_day")
-        }
-
-
-        return filtered_data
-    else:
+    if response.status_code != 200:
         return {"error": f"Failed to fetch weather data. Status code: {response.status_code}"}
 
-# ✅ Add this so it prints when running the file directly
+    data = response.json()
+    current = data.get("current", {})
+    forecast_day = data.get("forecast", {}).get("forecastday", [{}])[0]
+
+    return {
+        "date":                  forecast_day.get("date"),
+        "temperature":           current.get("temp_c"),
+        "feelslike_c":           current.get("feelslike_c"),
+        "condition":             current.get("condition", {}).get("text"),
+        "daily_chance_of_rain":  forecast_day.get("day", {}).get("daily_chance_of_rain", 0),
+        "is_day":                current.get("is_day")
+    }
+
 if __name__ == "__main__":
     print(get_weather_forecast())

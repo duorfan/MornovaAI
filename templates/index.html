@@ -1,212 +1,90 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mornova AI Dashboard</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 20px;
-            background-color: #f4f7fa;
-            text-align: center;
-        }
-        .container {
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #333;
-        }
-        button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button i {
-            margin-right: 8px;
-        }
-        .result {
-            display: none;
-            margin-top: 10px;
-            padding: 12px;
-            border-radius: 5px;
-            background: #eef2f7;
-            text-align: left;
-            font-size: 14px;
-            word-wrap: break-word;
-        }
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Mornova AI API Tester</h2>
-        
-        <button id="fetchWakeUpTime"><i class="fas fa-clock"></i> Get Wake-up Time</button>
-        <div class="result" id="wakeUpTimeResult"></div>
-        
-        <button id="fetchCalendar"><i class="fas fa-calendar-alt"></i> Get Calendar Events</button>
-        <div class="result" id="calendarResult"></div>
-        
-        <button id="fetchWeather"><i class="fas fa-cloud-sun"></i> Get Weather Forecast</button>
-        <div class="result" id="weatherResult"></div>
-    </div>
-
-    <script>
-        $(document).ready(function(){
-            function fetchData(endpoint, resultDiv, button) {
-                $(resultDiv).hide().html('<i>Loading...</i>');
-                $(button).addClass('loading');
-
-                $.get(endpoint, function(data){
-                    $(resultDiv).html("<pre>" + JSON.stringify(data, null, 2) + "</pre>").fadeIn();
-                }).fail(function() {
-                    $(resultDiv).html("<i>Error fetching data. Please try again.</i>").fadeIn();
-                }).always(function(){
-                    $(button).removeClass('loading');
-                });
-            }
-
-            $("#fetchWakeUpTime").click(function(){
-                fetchData("/wake-up-time", "#wakeUpTimeResult", this);
-            });
-
-            $("#fetchCalendar").click(function(){
-                fetchData("/calendar", "#calendarResult", this);
-            });
-
-            $("#fetchWeather").click(function(){
-                fetchData("/weather", "#weatherResult", this);
-            });
-        });
-    </script>
-</body>
-</html> -->
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Mornova Dashboard</title>
+  <!-- Playfair Display Serif Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
   <style>
+    /* ─── Base & Gradient Background ─────────────────────────────────────── */
     body {
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
+      background: linear-gradient(
+        135deg,
+        rgb(255, 216, 169)     0%,
+        rgba(255, 175, 45, 0.8)   30%,
+        rgb(156, 217, 255) 100%
+      );
+      min-height: 100vh;
       margin: 0;
       padding: 20px;
     }
-    /* Main container splits page into left and right sections */
+
+    /* ─── Hero Slogan Section ───────────────────────────────────────────── */
+    .hero {
+      /* background: white; */
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      /* box-shadow: 0 4px 16px rgba(0,0,0,0.1); */
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #137dff;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    /* ─── Layout ──────────────────────────────────────────────────────────── */
     .main-container {
       display: flex;
       gap: 20px;
       align-items: stretch;
     }
-    /* Left container holds two sections (top & bottom) with a 12px gap */
     .left-container {
       flex: 3;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    /* Each section gets a glass-like light blue background */
     .section {
-      background: rgba(173, 216, 230, 0.3);
-      backdrop-filter: blur(10px);
-      padding: 10px;
-      border-radius: 8px;
+      background: none;
+      padding: 0;
     }
-    /* Top section: current time and next alarm side by side */
-    .top-section {
-      display: flex;
-      gap: 20px;
-    }
-    .top-section .block {
-      flex: 1;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    /* Bottom section: weather, schedule, and music blocks side by side */
+    .top-section,
     .bottom-section {
       display: flex;
       gap: 20px;
     }
-    .bottom-section .block {
-      flex: 1;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    /* Right section: Suggestion */
-    .suggestion-section {
-      flex: 1;
-      background: rgba(173, 216, 230, 0.3);
-      backdrop-filter: blur(10px);
-      padding: 10px;
-      border-radius: 8px;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
-    .suggestion-section .block {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      width: 100%;
-      box-sizing: border-box;
-      height: 100%;
-    }
-    /* New AI Voice Assistant section (full width below main container) */
+    .suggestion-section,
     .ai-section {
-      margin-top: 12px;
-      background: rgba(173, 216, 230, 0.3);
-      backdrop-filter: blur(10px);
-      padding: 10px;
-      border-radius: 8px;
+      flex: 1;
     }
+
+    /* ─── Glass-Morph Panels ─────────────────────────────────────────────── */
+    .top-section .block,
+    .bottom-section .block,
+    .suggestion-section .block,
     .ai-section .block {
-      background: white;
+      background: rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
       padding: 20px;
-      border-radius: 8px;
       text-align: center;
+      box-sizing: border-box;
     }
-    /* Canvas styling for clocks */
+    .top-section .block,
+    .bottom-section .block { flex: 1; }
+    .suggestion-section .block { height: 100%; }
+
+    /* ─── Clock Styling ───────────────────────────────────────────────────── */
     canvas {
       background: #eee;
       border-radius: 50%;
@@ -214,8 +92,13 @@
       margin: 0 auto 10px auto;
     }
   </style>
+  
 </head>
 <body>
+  <!-- Hero Slogan -->
+  <div class="hero">
+    <h1>Mornova: Rise Smarter, Live Better</h1>
+  </div>
   <!-- Existing Sections -->
   <div class="main-container">
     <!-- Left side: Top & Bottom sections -->
@@ -252,12 +135,12 @@
           </div>
         </div>
         <!-- Music of the Day Block -->
-        <div class="block music">
+        <!-- <div class="block music">
           <h3>Music of the Day</h3>
           <div id="music-info">
             Loading music...
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
     <!-- Right side: Suggestion Section -->
